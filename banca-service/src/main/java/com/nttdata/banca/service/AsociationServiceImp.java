@@ -6,6 +6,7 @@ import com.nttdata.banca.model.repository.AsociationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,9 +32,14 @@ public class AsociationServiceImp implements AsociationService {
     @Override
     public Mono<Asociation> create(String idCustomer, String idProduct, float amount) {
         Asociation asociation = new Asociation();
-        List<Asociation> list = Collections.singletonList(asociation);
-        list.stream().map(x->{
-            Customer customer = webClientBuilder.build()
+        RestTemplate restTemplate=new RestTemplate();
+       /* List<Asociation> list = Collections.singletonList(asociation);
+        list.stream().map(x->{*/
+        Customer customer=restTemplate.getForObject("http://localhost:8085/mngcustomers/cus/"+idCustomer, Customer.class);
+        CategoryCustomer categoryCustomer=restTemplate.getForObject("http://localhost:8085/mngcustomers/cat/"+customer.getIdCategory(), CategoryCustomer.class);
+        Product product=restTemplate.getForObject("http://localhost:8086/mngproducts/pro/"+idProduct, Product.class);
+        CategoryProduct categoryProduct=restTemplate.getForObject("http://localhost:8086/mngproducts/cat/"+product.getIdCategory(), CategoryProduct.class);
+            /*Customer customer = webClientBuilder.build()
                     .get()
                     .uri("http://localhost:8085/mngcustomers/cus/"+idCustomer)
                     .retrieve()
@@ -59,7 +65,7 @@ public class AsociationServiceImp implements AsociationService {
                     .uri("http://localhost:8086/mngproducts/cat/"+product.getIdCategory())
                     .retrieve()
                     .bodyToMono(CategoryProduct.class)
-                    .block();
+                    .block();*/
 
 
             asociation.setIdCustomer(idCustomer);
@@ -67,11 +73,11 @@ public class AsociationServiceImp implements AsociationService {
             asociation.setCategory_customer(categoryCustomer.getName());
             asociation.setIdProduct(idProduct);
             asociation.setProduct(product.getName());
+            asociation.setCategory(categoryProduct.getName());
             asociation.setAmount(amount);
-            return asociation;
-        });
 
-        return Mono.just(asociation);
+
+        return asociationRepository.save(asociation);
 
     }
 
