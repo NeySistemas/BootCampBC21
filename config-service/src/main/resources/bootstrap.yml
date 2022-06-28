@@ -7,5 +7,6 @@ spring:
       server:
         git:
           uri: https://github.com/NeySistemas/BootCampBC21.git
-          searchPath: config-data
-
+          searchPaths: config-data
+          username: ${GIT_USER}
+          password: ${GIT_PASSWORD}
