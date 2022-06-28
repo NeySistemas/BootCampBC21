@@ -24,6 +24,9 @@ public class AsociationServiceImp implements AsociationService {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     public Flux<Asociation> findAll() {
         return asociationRepository.findAll();
@@ -32,53 +35,21 @@ public class AsociationServiceImp implements AsociationService {
     @Override
     public Mono<Asociation> create(String idCustomer, String idProduct, float amount) {
         Asociation asociation = new Asociation();
-        RestTemplate restTemplate=new RestTemplate();
-       /* List<Asociation> list = Collections.singletonList(asociation);
-        list.stream().map(x->{*/
+
         Customer customer=restTemplate.getForObject("http://localhost:8085/mngcustomers/cus/"+idCustomer, Customer.class);
         CategoryCustomer categoryCustomer=restTemplate.getForObject("http://localhost:8085/mngcustomers/cat/"+customer.getIdCategory(), CategoryCustomer.class);
         Product product=restTemplate.getForObject("http://localhost:8086/mngproducts/pro/"+idProduct, Product.class);
         CategoryProduct categoryProduct=restTemplate.getForObject("http://localhost:8086/mngproducts/cat/"+product.getIdCategory(), CategoryProduct.class);
-            /*Customer customer = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8085/mngcustomers/cus/"+idCustomer)
-                    .retrieve()
-                    .bodyToMono(Customer.class)
-                    .block();
-            System.out.println("aa: "+customer.getName());
-            CategoryCustomer categoryCustomer = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8085/mngcustomers/cat/"+customer.getIdCategory())
-                    .retrieve()
-                    .bodyToMono(CategoryCustomer.class)
-                    .block();
 
-            Product product = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8086/mngproducts/pro/"+idProduct)
-                    .retrieve()
-                    .bodyToMono(Product.class)
-                    .block();
-
-            CategoryProduct categoryProduct = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8086/mngproducts/cat/"+product.getIdCategory())
-                    .retrieve()
-                    .bodyToMono(CategoryProduct.class)
-                    .block();*/
-
-
-            asociation.setIdCustomer(idCustomer);
-            asociation.setCustomer(customer.getName());
-            asociation.setCategory_customer(categoryCustomer.getName());
-            asociation.setIdProduct(idProduct);
-            asociation.setProduct(product.getName());
-            asociation.setCategory(categoryProduct.getName());
-            asociation.setAmount(amount);
-
+        asociation.setIdCustomer(idCustomer);
+        asociation.setCustomer(customer.getName());
+        asociation.setCategory_customer(categoryCustomer.getName());
+        asociation.setIdProduct(idProduct);
+        asociation.setProduct(product.getName());
+        asociation.setCategory(categoryProduct.getName());
+        asociation.setAmount(amount);
 
         return asociationRepository.save(asociation);
-
     }
 
     @Override
